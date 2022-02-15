@@ -1,0 +1,1 @@
+This project will allow you to play tic tac toe in the browser. In this project I will be using Javascript design patterns such as factory functions and modules to practice my knowledge on common Javascript patterns.
