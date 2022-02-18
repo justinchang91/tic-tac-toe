@@ -28,8 +28,8 @@ const gameState = (function(){
 
     let _turn = "user";
 
-    function gameOver() {
-        return !gameBoard.board.includes("");
+    function gameOver(mark) {
+        return checkWinner(mark) || !gameBoard.board.includes("");
     }
 
     function changeTurn() {
@@ -41,7 +41,32 @@ const gameState = (function(){
         return _turn;
     }
 
-    return {changeTurn, getTurn, gameOver};
+    function checkWinner(mark) {
+        if ((gameBoard.board[0] === mark && gameBoard.board[1] === mark && gameBoard.board[2] === mark) ||
+            (gameBoard.board[3] === mark && gameBoard.board[4] === mark && gameBoard.board[5] === mark) ||
+            (gameBoard.board[6] === mark && gameBoard.board[7] === mark && gameBoard.board[8] === mark) ||
+            (gameBoard.board[0] === mark && gameBoard.board[3] === mark && gameBoard.board[6] === mark) ||
+            (gameBoard.board[1] === mark && gameBoard.board[4] === mark && gameBoard.board[7] === mark) ||
+            (gameBoard.board[2] === mark && gameBoard.board[5] === mark && gameBoard.board[8] === mark) ||
+            (gameBoard.board[0] === mark && gameBoard.board[4] === mark && gameBoard.board[8] === mark) ||
+            (gameBoard.board[2] === mark && gameBoard.board[4] === mark && gameBoard.board[6] === mark)) {
+                return true;
+        } else {
+            return false;
+        }
+    }
+
+    function getGameResults() {
+        if (checkWinner("X")) {
+            return "user";  // These are hard coded but should change once I make player objects
+        } else if (checkWinner("O")) {
+            return "computer";
+        } else {
+            return "tie";
+        }
+    }
+
+    return {changeTurn, getTurn, gameOver, getGameResults};
 
 
 })();
@@ -88,10 +113,15 @@ const gameController = (function(){
         console.log(`Placed mark at square ${squareId}`);
         console.log(`Here is the new board: ${gameBoard.board}`);
 
-        // Check if game is over after every user and computer move
-        gameState.changeTurn();
         gameBoard.displayBoardContentToScreen();
-        enableClickSquares();
+
+        // Check if game is over after every user and computer move
+        if (gameState.gameOver("X")) {
+            console.log("Game over. User (X) won!");
+        } else {
+            gameState.changeTurn();
+            enableClickSquares();
+        }
     }
 
     function placeComputerMark(e) {
@@ -99,13 +129,20 @@ const gameController = (function(){
         gameBoard.editBoardArray("O", squareId);
         disableClickSquares();
 
+
         console.log(`Placed mark at square ${squareId}`);
         console.log(`Here is the new board: ${gameBoard.board}`);
 
-        // Check if game is over after every user and computer move
-        gameState.changeTurn();
         gameBoard.displayBoardContentToScreen();
-        enableClickSquares();
+
+        // Check if game is over after every user and computer move
+        if (gameState.gameOver("O")){
+            console.log("Game over. Computer (O) won!");
+        } else {
+            gameState.changeTurn();
+            enableClickSquares();
+        }
+        
     }
 
     return {enableClickSquares};
