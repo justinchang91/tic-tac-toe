@@ -51,28 +51,39 @@ const gameState = (function(){
 
 const gameController = (function(){
 
-    function enableUserClickSquares() {
+    function enableClickSquares() {
         for (let i = 0; i < 9; i++) {
             const square = document.querySelector(`.square${i}`);
             if (gameBoard.board[i] == "") {
-                square.addEventListener("click", placeUserMark);
-                console.log(`Event listener added to square ${square.id}`);
+
+                if (gameState.getTurn() === "user") {
+                    square.addEventListener("click", placeUserMark);
+                    console.log(`User event listener added to square ${square.id}`);
+                } else {
+                    square.addEventListener("click", placeComputerMark);
+                    console.log(`Computer event listener added to square ${square.id}`);
+                }
             }
         }
     }
 
-    function disableUserClickSquares() {
+    function disableClickSquares() {
         for (let i = 0; i < 9; i++) {
             const square = document.querySelector(`.square${i}`);
-            square.removeEventListener("click", placeUserMark);
-            console.log(`Disabled click on square ${square.id}`);
+            if (gameState.getTurn() === "user") {
+                square.removeEventListener("click", placeUserMark);
+                console.log(`Disabled user click on square ${square.id}`);
+            } else {
+                square.removeEventListener("click", placeComputerMark);
+                console.log(`Disabled computer click on square ${square.id}`);
+            }
         }
     }
 
     function placeUserMark(e) {
         const squareId = e.target.id;
         gameBoard.editBoardArray("X", squareId);
-        disableUserClickSquares();
+        disableClickSquares();
 
         console.log(`Placed mark at square ${squareId}`);
         console.log(`Here is the new board: ${gameBoard.board}`);
@@ -80,15 +91,27 @@ const gameController = (function(){
         // Check if game is over after every user and computer move
         gameState.changeTurn();
         gameBoard.displayBoardContentToScreen();
-
+        enableClickSquares();
     }
 
-    return {enableUserClickSquares};
+    function placeComputerMark(e) {
+        const squareId = e.target.id;
+        gameBoard.editBoardArray("O", squareId);
+        disableClickSquares();
+
+        console.log(`Placed mark at square ${squareId}`);
+        console.log(`Here is the new board: ${gameBoard.board}`);
+
+        // Check if game is over after every user and computer move
+        gameState.changeTurn();
+        gameBoard.displayBoardContentToScreen();
+        enableClickSquares();
+    }
+
+    return {enableClickSquares};
 
 })();
 
-
-gameBoard.editBoardArray("X", 1);
 gameBoard.displayBoardContentToScreen();
-gameController.enableUserClickSquares();
+gameController.enableClickSquares();
 
