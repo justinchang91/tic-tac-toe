@@ -3,6 +3,9 @@
 body {
     margin: 0;
     padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .title {
@@ -13,6 +16,60 @@ body {
     text-align: center;
 }
 
+.settings {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+}
+
+.settings .mode {
+    display: flex;
+    flex-direction: column;
+}
+
+.settings .player {
+    color: rgb(235,235,228);
+    display: flex;
+    flex-direction: column;
+}
+
+.settings .computer {
+    color: rgb(235,235,228);
+    display: flex;
+    flex-direction: column;
+}
+
+.settings .computer.active {
+    color: black;
+}
+
+.settings .player.active {
+    color: black;
+}
+
+.settings .marks {
+    color: rgb(235,235,228);
+    display: flex;
+    flex-direction: row;
+}
+
+.settings .marks.active {
+    color: black;
+}
+
+.settings .difficulty {
+    color: rgb(235,235,228);
+    display: flex;
+    flex-direction: row;
+}
+
+.settings .difficulty.active {
+    color: black;
+}
+
+.settings .submit-button {
+    align-self: flex-start;
+}
 .board {
     margin: 0 auto;
     width: 400px;

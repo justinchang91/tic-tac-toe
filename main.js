@@ -117,7 +117,12 @@ const gameController = (function(){
 
         // Check if game is over after every user and computer move
         if (gameState.gameOver("X")) {
-            console.log("Game over. User (X) won!");
+            const result = gameState.getGameResults();
+            if (result === "tie") {
+                console.log("Game over. Tie!");
+            } else {
+                console.log(`Game over. ${result} won!`);
+            }
         } else {
             gameState.changeTurn();
             enableClickSquares();
@@ -137,7 +142,12 @@ const gameController = (function(){
 
         // Check if game is over after every user and computer move
         if (gameState.gameOver("O")){
-            console.log("Game over. Computer (O) won!");
+            const result = gameState.getGameResults();
+            if (result === "tie") {
+                console.log("Game over. Tie!");
+            } else {
+                console.log(`Game over. ${result} won!`);
+            }
         } else {
             gameState.changeTurn();
             enableClickSquares();
@@ -148,6 +158,84 @@ const gameController = (function(){
     return {enableClickSquares};
 
 })();
+
+
+const pvpButton = document.querySelector('input[id="pvp"]');
+pvpButton.addEventListener("click", enablePVPElements);
+
+const aiButton = document.querySelector('input[id="ai"]');
+aiButton.addEventListener("click", enableAIElements);
+
+
+
+function enablePVPElements() {
+    disableAIElements();
+    const playerOptions = document.querySelectorAll(".player");
+    playerOptions.forEach(player => {
+        player.classList.add("active");
+        const textboxes = player.querySelector('input[type="text"]');
+        textboxes.disabled = false;
+        const marks = player.querySelector(".marks");
+        marks.classList.add("active");
+        const radioButtons = marks.querySelectorAll('input[type=radio]');
+        radioButtons.forEach(radio => radio.disabled = false);
+    });
+}
+
+function disablePVPElements() {
+    const playerOptions = document.querySelectorAll(".player");
+    playerOptions.forEach(player => {
+        player.classList.remove("active");
+        const textboxes = player.querySelector('input[type="text"]');
+        textboxes.disabled = true;
+        const marks = player.querySelector(".marks");
+        marks.classList.remove("active");
+        const radioButtons = marks.querySelectorAll('input[type=radio]');
+        radioButtons.forEach(radio => radio.disabled = true);
+    });
+}
+
+function enableAIElements(){
+    disablePVPElements();
+    const aiOption = document.querySelector(".computer");
+    aiOption.classList.add("active");
+    const difficulty = document.querySelector(".difficulty");
+    difficulty.classList.add("active");
+    const radioButtons = difficulty.querySelectorAll('input[type=radio]');
+    radioButtons.forEach(radio => radio.disabled = false);
+
+    const player1 = document.querySelector(".player1");
+    player1.classList.add("active");
+    const textboxes = player1.querySelector('input[type="text"]');
+    textboxes.disabled = false;
+    const marks = player1.querySelector(".marks");
+    marks.classList.add("active");
+    const p1RadioButtons = marks.querySelectorAll('input[type=radio]');
+    p1RadioButtons.forEach(radio => radio.disabled = false);
+}
+
+function disableAIElements() {
+    const aiOption = document.querySelector(".computer");
+    aiOption.classList.remove("active");
+    const difficulty = document.querySelectorAll(".difficulty");
+    difficulty.forEach(mark => {
+        const radioButton = mark.querySelector('input[type=radio]');
+        radioButton.disabled = true
+        mark.classList.remove("active");
+    })
+
+    const player1 = document.querySelector(".player1");
+    player1.classList.remove("active");
+    const textboxes = player1.querySelector('input[type="text"]');
+    textboxes.disabled = true;
+    const marks = player1.querySelector(".marks");
+    marks.classList.remove("active");
+    const radioButtons = marks.querySelectorAll('input[type=radio]');
+    radioButtons.forEach(radio => radio.disabled = true);
+}
+
+
+
 
 gameBoard.displayBoardContentToScreen();
 gameController.enableClickSquares();
