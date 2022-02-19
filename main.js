@@ -160,79 +160,162 @@ const gameController = (function(){
 })();
 
 
+/* Controls the settings form */
+
+const settingsController = (function() {
+    function enablePVPElements() {
+        disableAIElements();
+        const playerOptions = document.querySelectorAll(".player");
+        playerOptions.forEach(player => {
+            player.classList.add("active");
+            const textboxes = player.querySelector('input[type="text"]');
+            textboxes.disabled = false;
+            const marks = player.querySelector(".marks");
+            marks.classList.add("active");
+            const radioButtons = marks.querySelectorAll('input[type=radio]');
+            radioButtons.forEach(radio => radio.disabled = false);
+        });
+    }
+    
+    function disablePVPElements() {
+        const playerOptions = document.querySelectorAll(".player");
+        playerOptions.forEach(player => {
+            player.classList.remove("active");
+            const textboxes = player.querySelector('input[type="text"]');
+            textboxes.disabled = true;
+            const marks = player.querySelector(".marks");
+            marks.classList.remove("active");
+            const radioButtons = marks.querySelectorAll('input[type=radio]');
+            radioButtons.forEach(radio => radio.disabled = true);
+        });
+    }
+    
+    function enableAIElements(){
+        disablePVPElements();
+        const aiOption = document.querySelector(".computer");
+        aiOption.classList.add("active");
+        const difficulty = document.querySelector(".difficulty");
+        difficulty.classList.add("active");
+        const radioButtons = difficulty.querySelectorAll('input[type=radio]');
+        radioButtons.forEach(radio => radio.disabled = false);
+    
+        const player1 = document.querySelector(".player1");
+        player1.classList.add("active");
+        const textboxes = player1.querySelector('input[type="text"]');
+        textboxes.disabled = false;
+        const marks = player1.querySelector(".marks");
+        marks.classList.add("active");
+        const p1RadioButtons = marks.querySelectorAll('input[type=radio]');
+        p1RadioButtons.forEach(radio => radio.disabled = false);
+    }
+    
+    function disableAIElements() {
+        const aiOption = document.querySelector(".computer");
+        aiOption.classList.remove("active");
+        const difficulty = document.querySelector(".difficulty");
+        difficulty.classList.remove("active");
+        const aiRadioButtons = difficulty.querySelectorAll('input[type=radio]');
+        aiRadioButtons.forEach(radio => radio.disabled = true);
+    
+        const player1 = document.querySelector(".player1");
+        player1.classList.remove("active");
+        const textboxes = player1.querySelector('input[type="text"]');
+        textboxes.disabled = true;
+        const marks = player1.querySelector(".marks");
+        marks.classList.remove("active");
+        const p1RadioButtons = marks.querySelectorAll('input[type=radio]');
+        p1RadioButtons.forEach(radio => radio.disabled = true);
+    }
+
+    function processFormData(ev) {
+        ev.preventDefault()  // stop the form from submitting
+
+        let gameSettings = {}
+
+        // Check which mode we're in
+        const mode = document.querySelector('.mode');
+        if (mode.querySelector('input[id="pvp"]').checked === true) {
+            gameSettings.mode = "pvp";
+        } else if (mode.querySelector('input[id="ai"]').checked === true) {
+            gameSettings.mode = "ai";
+        } else {  // User didn't select anything
+            console.log("Error! User didn't select a mode"); // temporary
+            return;
+        }
+
+        // Get the player 1 info
+        gameSettings.player1 = {};
+        const player1 = document.querySelector('.player1');
+        getPlayerInfo(player1, "player1", gameSettings);
+        
+        if (gameSettings.mode === "pvp") {
+            // get player 2 info
+            gameSettings.player2 = {};
+            const player2 = document.querySelector('.player2');
+            getPlayerInfo(player2, "player2", gameSettings);
+        } else {
+            // Get computer info
+            gameSettings.computer = {};
+            const computer = document.querySelector('.computer');
+            getComputerInfo(computer, gameSettings);
+        }
+
+        //return gameSettings;
+        console.log(gameSettings);
+    }
+
+    function getPlayerInfo(player, playerNum, gameSettings) {
+        // Get player name:
+        const name = player.querySelector('input[type=text]').value;
+        if (name === "") {
+            console.log("Please enter a name for player 1!");
+            return;
+        } else {
+            gameSettings[playerNum].name = name;
+        }
+
+        // Get player mark
+        const mark = player.querySelector('.marks');
+        if (mark.querySelector('input[id="x"]').checked === true) {
+            gameSettings[playerNum].mark = "X";
+        } else if (mark.querySelector('input[id="o"]').checked === true) {
+            gameSettings[playerNum].mark = "O";
+        } else {  // User didn't select anything
+            console.log("Error! User didn't select a mode"); // temporary
+            return;
+        }
+    }
+
+    function getComputerInfo(computer, gameSettings) {
+        // Get computer difficulty
+        const compDifficulty = computer.querySelector('.difficulty');
+        if (compDifficulty.querySelector('input[id="easy"]').checked === true) {
+            gameSettings.computer.difficulty = "easy";
+        } else if (compDifficulty.querySelector('input[id="hard"]').checked === true) {
+            gameSettings.computer.difficulty = "hard";
+        } else {  // User didn't select anything
+            console.log("Error! User didn't select a mode"); // temporary
+            return;
+        }
+
+        // Get computer mark
+        const p1Mark = gameSettings.player1.mark;
+        gameSettings.computer.mark = p1Mark === "X" ? "O" : "X";
+    }
+
+    return {enablePVPElements, enableAIElements, processFormData}
+})();
+
 const pvpButton = document.querySelector('input[id="pvp"]');
-pvpButton.addEventListener("click", enablePVPElements);
+pvpButton.addEventListener("click", settingsController.enablePVPElements);
 
 const aiButton = document.querySelector('input[id="ai"]');
-aiButton.addEventListener("click", enableAIElements);
+aiButton.addEventListener("click", settingsController.enableAIElements);
+
+const playButton = document.querySelector(".submit-button");
+playButton.addEventListener("click", settingsController.processFormData);
 
 
-
-function enablePVPElements() {
-    disableAIElements();
-    const playerOptions = document.querySelectorAll(".player");
-    playerOptions.forEach(player => {
-        player.classList.add("active");
-        const textboxes = player.querySelector('input[type="text"]');
-        textboxes.disabled = false;
-        const marks = player.querySelector(".marks");
-        marks.classList.add("active");
-        const radioButtons = marks.querySelectorAll('input[type=radio]');
-        radioButtons.forEach(radio => radio.disabled = false);
-    });
-}
-
-function disablePVPElements() {
-    const playerOptions = document.querySelectorAll(".player");
-    playerOptions.forEach(player => {
-        player.classList.remove("active");
-        const textboxes = player.querySelector('input[type="text"]');
-        textboxes.disabled = true;
-        const marks = player.querySelector(".marks");
-        marks.classList.remove("active");
-        const radioButtons = marks.querySelectorAll('input[type=radio]');
-        radioButtons.forEach(radio => radio.disabled = true);
-    });
-}
-
-function enableAIElements(){
-    disablePVPElements();
-    const aiOption = document.querySelector(".computer");
-    aiOption.classList.add("active");
-    const difficulty = document.querySelector(".difficulty");
-    difficulty.classList.add("active");
-    const radioButtons = difficulty.querySelectorAll('input[type=radio]');
-    radioButtons.forEach(radio => radio.disabled = false);
-
-    const player1 = document.querySelector(".player1");
-    player1.classList.add("active");
-    const textboxes = player1.querySelector('input[type="text"]');
-    textboxes.disabled = false;
-    const marks = player1.querySelector(".marks");
-    marks.classList.add("active");
-    const p1RadioButtons = marks.querySelectorAll('input[type=radio]');
-    p1RadioButtons.forEach(radio => radio.disabled = false);
-}
-
-function disableAIElements() {
-    const aiOption = document.querySelector(".computer");
-    aiOption.classList.remove("active");
-    const difficulty = document.querySelectorAll(".difficulty");
-    difficulty.forEach(mark => {
-        const radioButton = mark.querySelector('input[type=radio]');
-        radioButton.disabled = true
-        mark.classList.remove("active");
-    })
-
-    const player1 = document.querySelector(".player1");
-    player1.classList.remove("active");
-    const textboxes = player1.querySelector('input[type="text"]');
-    textboxes.disabled = true;
-    const marks = player1.querySelector(".marks");
-    marks.classList.remove("active");
-    const radioButtons = marks.querySelectorAll('input[type=radio]');
-    radioButtons.forEach(radio => radio.disabled = true);
-}
 
 
 
