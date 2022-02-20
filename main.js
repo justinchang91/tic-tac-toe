@@ -153,10 +153,29 @@ const gameController = (function(){
             gameState.changeTurn();
             enableClickSquares();
         }
-        
     }
 
-    return {enableClickSquares};
+    function gameSetup() {
+        const pvpButton = document.querySelector('input[id="pvp"]');
+        pvpButton.addEventListener("click", settingsController.enablePVPElements);
+
+        const aiButton = document.querySelector('input[id="ai"]');
+        aiButton.addEventListener("click", settingsController.enableAIElements);
+
+        const playButton = document.querySelector(".submit");
+        playButton.addEventListener("click", settingsController.processFormData);
+    }
+
+    function gameStart() {
+        gameBoard.displayBoardContentToScreen();
+        gameController.enableClickSquares();
+
+        // Make a function that creates the player objects. Call the function here?
+        // Maybe when we add to the gameSettings object, we create the actual players
+        // using a factory function then add that to the gameSettings object.
+    }
+
+    return {gameSetup, gameStart};
 
 })();
 
@@ -287,15 +306,10 @@ const settingsController = (function() {
         gameStartSettings();
         console.log(gameSettings);
         gameState.gameSettings = gameSettings;
-        console.log(gameState.gameSettings);
+        gameController.gameStart();
     }
 
     function resetSettings() {
-        /*const radioBtns = document.querySelectorAll('radio-btn');
-        radioBtns.forEach(btn => btn.checked = false);
-        const textBoxes = document.querySelectorAll('input[type=text]');
-        textBoxes.
-        */
        document.forms[0].reset(); // reset the form
     }
 
@@ -345,18 +359,8 @@ const settingsController = (function() {
     return {enablePVPElements, enableAIElements, processFormData, resetSettings}
 })();
 
-const pvpButton = document.querySelector('input[id="pvp"]');
-pvpButton.addEventListener("click", settingsController.enablePVPElements);
 
-const aiButton = document.querySelector('input[id="ai"]');
-aiButton.addEventListener("click", settingsController.enableAIElements);
+gameController.gameSetup();
 
-const playButton = document.querySelector(".submit");
-playButton.addEventListener("click", settingsController.processFormData);
 
-const restartButton = document.querySelector(".restart");
-restartButton.addEventListener("click", settingsController.resetSettings);
-
-gameBoard.displayBoardContentToScreen();
-gameController.enableClickSquares();
 
