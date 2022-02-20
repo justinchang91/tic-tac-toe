@@ -27,6 +27,7 @@ const gameBoard = (function(){
 const gameState = (function(){
 
     let _turn = "user";
+    let gameSettings = {};
 
     function gameOver(mark) {
         return checkWinner(mark) || !gameBoard.board.includes("");
@@ -66,7 +67,7 @@ const gameState = (function(){
         }
     }
 
-    return {changeTurn, getTurn, gameOver, getGameResults};
+    return {changeTurn, getTurn, gameOver, getGameResults, gameSettings};
 
 
 })();
@@ -227,6 +228,28 @@ const settingsController = (function() {
         p1RadioButtons.forEach(radio => radio.disabled = true);
     }
 
+    function disableModeElements() {
+        const mode = document.querySelector(".mode");
+        mode.classList.add("hide");
+        const modeRadioButtons = mode.querySelectorAll('input[type=radio]');
+        modeRadioButtons.forEach(radio => radio.disabled = true);
+    }
+
+    function enableModeElements() {
+        const mode = document.querySelector(".mode");
+        mode.classList.remove("hide");
+        const modeRadioButtons = mode.querySelectorAll('input[type=radio]');
+        modeRadioButtons.forEach(radio => radio.disabled = false);
+    }
+
+    function gameStartSettings() {
+        disablePVPElements();
+        disableAIElements();
+        disableModeElements();
+        document.querySelector(".restart").classList.add("active");
+        document.querySelector(".submit").classList.add("hide");
+    }
+
     function processFormData(ev) {
         ev.preventDefault()  // stop the form from submitting
 
@@ -246,22 +269,34 @@ const settingsController = (function() {
         // Get the player 1 info
         gameSettings.player1 = {};
         const player1 = document.querySelector('.player1');
-        getPlayerInfo(player1, "player1", gameSettings);
+        if (!getPlayerInfo(player1, "player1", gameSettings)) return;
         
         if (gameSettings.mode === "pvp") {
             // get player 2 info
             gameSettings.player2 = {};
             const player2 = document.querySelector('.player2');
-            getPlayerInfo(player2, "player2", gameSettings);
+            if (!getPlayerInfo(player2, "player2", gameSettings)) return;
         } else {
             // Get computer info
             gameSettings.computer = {};
             const computer = document.querySelector('.computer');
-            getComputerInfo(computer, gameSettings);
+            if(!getComputerInfo(computer, gameSettings)) return;
         }
 
-        //return gameSettings;
+        
+        gameStartSettings();
         console.log(gameSettings);
+        gameState.gameSettings = gameSettings;
+        console.log(gameState.gameSettings);
+    }
+
+    function resetSettings() {
+        /*const radioBtns = document.querySelectorAll('radio-btn');
+        radioBtns.forEach(btn => btn.checked = false);
+        const textBoxes = document.querySelectorAll('input[type=text]');
+        textBoxes.
+        */
+       document.forms[0].reset(); // reset the form
     }
 
     function getPlayerInfo(player, playerNum, gameSettings) {
@@ -269,7 +304,7 @@ const settingsController = (function() {
         const name = player.querySelector('input[type=text]').value;
         if (name === "") {
             console.log("Please enter a name for player 1!");
-            return;
+            return false;
         } else {
             gameSettings[playerNum].name = name;
         }
@@ -282,8 +317,10 @@ const settingsController = (function() {
             gameSettings[playerNum].mark = "O";
         } else {  // User didn't select anything
             console.log("Error! User didn't select a mode"); // temporary
-            return;
+            return false;
         }
+
+        return true;
     }
 
     function getComputerInfo(computer, gameSettings) {
@@ -295,15 +332,17 @@ const settingsController = (function() {
             gameSettings.computer.difficulty = "hard";
         } else {  // User didn't select anything
             console.log("Error! User didn't select a mode"); // temporary
-            return;
+            return false;
         }
 
         // Get computer mark
         const p1Mark = gameSettings.player1.mark;
         gameSettings.computer.mark = p1Mark === "X" ? "O" : "X";
+
+        return true;
     }
 
-    return {enablePVPElements, enableAIElements, processFormData}
+    return {enablePVPElements, enableAIElements, processFormData, resetSettings}
 })();
 
 const pvpButton = document.querySelector('input[id="pvp"]');
@@ -312,13 +351,11 @@ pvpButton.addEventListener("click", settingsController.enablePVPElements);
 const aiButton = document.querySelector('input[id="ai"]');
 aiButton.addEventListener("click", settingsController.enableAIElements);
 
-const playButton = document.querySelector(".submit-button");
+const playButton = document.querySelector(".submit");
 playButton.addEventListener("click", settingsController.processFormData);
 
-
-
-
-
+const restartButton = document.querySelector(".restart");
+restartButton.addEventListener("click", settingsController.resetSettings);
 
 gameBoard.displayBoardContentToScreen();
 gameController.enableClickSquares();

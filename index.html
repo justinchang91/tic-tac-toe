@@ -11,11 +11,11 @@
         <form class="settings">
             <div class="mode">
                 Mode
-                <div class="mode-option-1">
+                <div class="radio-btn">
                     <input type="radio" id="pvp" name="mode" value="pvp">
                     <label for="pvp">vs Player</label>
                 </div>
-                <div class="mode-option-2">
+                <div class="radio-btn">
                     <input type="radio" id="ai" name="mode" value="ai">
                     <label for="ai">vs AI</label>
                 </div>
@@ -24,11 +24,11 @@
                 Player 1
                 <input disabled type="text" id="p1-text" name="p1">
                 <div class="marks">
-                    <div class="p1-option-x">
+                    <div class="radio-btn">
                         <input disabled type="radio" id="x" name="p1">
                         <label for="p1-x">X</label>
                     </div>
-                    <div class="p1-option-o">
+                    <div class="radio-btn">
                         <input disabled type="radio" id="o" name="p1">
                         <label for="p1-o">O</label>
                     </div>
@@ -38,11 +38,11 @@
                 Player 2
                 <input disabled type="text" id="p2-text" name="p2">
                 <div class="marks">
-                    <div class="p2-option-x">
+                    <div class="radio-btn">
                         <input disabled type="radio" id="x" name="p2">
                         <label for="p2-x">X</label>
                     </div>
-                    <div class="p2-option-o">
+                    <div class="radio-btn">
                         <input disabled type="radio" id="o" name="p2">
                         <label for="p2-o">O</label>
                     </div>
@@ -51,17 +51,20 @@
             <div class="computer">
                 Difficulty
                 <div class="difficulty">
-                    <div class="easy">
+                    <div class="easy radio-btn">
                         <input disabled type="radio" id="easy" name="difficulty">
                         <label for="easy">Easy</label>
                     </div>
-                    <div class="hard">
+                    <div class="hard radio-btn">
                         <input disabled type="radio" id="hard" name="difficulty">
                         <label for="hard">Hard</label>
                     </div>
                 </div>
             </div> 
-            <input type="submit" value="Play" class="submit-button">
+            <div class="buttons">
+                <input type="submit" value="Play" class="submit button">
+                <button class="restart button">Restart</button>
+            </div>
         </form>
         <div class="board">
             <div class="row">
