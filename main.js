@@ -26,7 +26,7 @@ const gameBoard = (function(){
 
 const gameState = (function(){
 
-    let _turn = "user";
+    let turn = "";
     let gameSettings = {};
 
     function gameOver(mark) {
@@ -34,12 +34,12 @@ const gameState = (function(){
     }
 
     function changeTurn() {
-        _turn = _turn == "user" ? "computer" : "user";
-        console.log(`Changed turn to ${_turn}`);
-    }
-
-    function getTurn() {
-        return _turn;
+        if (gameState.turn === gameState.gameSettings.X) {
+            gameState.turn = gameState.gameSettings.O;
+        } else {
+            gameState.turn = gameState.gameSettings.X;
+        }
+        console.log(`Changed turn to ${gameState.turn}`);
     }
 
     function checkWinner(mark) {
@@ -67,7 +67,7 @@ const gameState = (function(){
         }
     }
 
-    return {changeTurn, getTurn, gameOver, getGameResults, gameSettings};
+    return {changeTurn, gameOver, getGameResults, gameSettings, turn};
 
 
 })();
@@ -82,11 +82,11 @@ const gameController = (function(){
             const square = document.querySelector(`.square${i}`);
             if (gameBoard.board[i] == "") {
 
-                if (gameState.getTurn() === "user") {
-                    square.addEventListener("click", placeUserMark);
+                if (gameState.turn === gameState.gameSettings.X) {
+                    square.addEventListener("click", placeXMark);
                     console.log(`User event listener added to square ${square.id}`);
                 } else {
-                    square.addEventListener("click", placeComputerMark);
+                    square.addEventListener("click", placeOMark);
                     console.log(`Computer event listener added to square ${square.id}`);
                 }
             }
@@ -96,22 +96,22 @@ const gameController = (function(){
     function disableClickSquares() {
         for (let i = 0; i < 9; i++) {
             const square = document.querySelector(`.square${i}`);
-            if (gameState.getTurn() === "user") {
-                square.removeEventListener("click", placeUserMark);
+            if (gameState.turn === gameState.gameSettings.X) {
+                square.removeEventListener("click", placeXMark);
                 console.log(`Disabled user click on square ${square.id}`);
             } else {
-                square.removeEventListener("click", placeComputerMark);
+                square.removeEventListener("click", placeOMark);
                 console.log(`Disabled computer click on square ${square.id}`);
             }
         }
     }
 
-    function placeUserMark(e) {
+    function placeXMark(e) {
         const squareId = e.target.id;
         gameBoard.editBoardArray("X", squareId);
         disableClickSquares();
 
-        console.log(`Placed mark at square ${squareId}`);
+        console.log(`${gameState.gameSettings.X} placed mark at square ${squareId}`);
         console.log(`Here is the new board: ${gameBoard.board}`);
 
         gameBoard.displayBoardContentToScreen();
@@ -130,13 +130,13 @@ const gameController = (function(){
         }
     }
 
-    function placeComputerMark(e) {
+    function placeOMark(e) {
         const squareId = e.target.id;
         gameBoard.editBoardArray("O", squareId);
         disableClickSquares();
 
 
-        console.log(`Placed mark at square ${squareId}`);
+        console.log(`${gameState.gameSettings.O} placed mark at square ${squareId}`);
         console.log(`Here is the new board: ${gameBoard.board}`);
 
         gameBoard.displayBoardContentToScreen();
@@ -168,7 +168,9 @@ const gameController = (function(){
 
     function gameStart() {
         gameBoard.displayBoardContentToScreen();
-        gameController.enableClickSquares();
+        console.log(gameState.gameSettings.X);
+        gameState.turn = gameState.gameSettings.X; // Set turn to X for default
+        enableClickSquares();
 
         // Make a function that creates the player objects. Call the function here?
         // Maybe when we add to the gameSettings object, we create the actual players
@@ -286,15 +288,13 @@ const settingsController = (function() {
         }
 
         // Get the player 1 info
-        gameSettings.player1 = {};
         const player1 = document.querySelector('.player1');
-        if (!getPlayerInfo(player1, "player1", gameSettings)) return;
+        if (!getPlayerInfo(player1, gameSettings)) return;
         
         if (gameSettings.mode === "pvp") {
             // get player 2 info
-            gameSettings.player2 = {};
             const player2 = document.querySelector('.player2');
-            if (!getPlayerInfo(player2, "player2", gameSettings)) return;
+            if (!getPlayerInfo(player2, gameSettings)) return;
         } else {
             // Get computer info
             gameSettings.computer = {};
@@ -313,22 +313,20 @@ const settingsController = (function() {
        document.forms[0].reset(); // reset the form
     }
 
-    function getPlayerInfo(player, playerNum, gameSettings) {
+    function getPlayerInfo(player, gameSettings) {
         // Get player name:
         const name = player.querySelector('input[type=text]').value;
         if (name === "") {
             console.log("Please enter a name for player 1!");
             return false;
-        } else {
-            gameSettings[playerNum].name = name;
-        }
+        } 
 
-        // Get player mark
+        // Get player mark, assign name to mark
         const mark = player.querySelector('.marks');
         if (mark.querySelector('input[id="x"]').checked === true) {
-            gameSettings[playerNum].mark = "X";
+            gameSettings["X"] = name;
         } else if (mark.querySelector('input[id="o"]').checked === true) {
-            gameSettings[playerNum].mark = "O";
+            gameSettings["O"] = name;
         } else {  // User didn't select anything
             console.log("Error! User didn't select a mode"); // temporary
             return false;
@@ -358,7 +356,6 @@ const settingsController = (function() {
 
     return {enablePVPElements, enableAIElements, processFormData, resetSettings}
 })();
-
 
 gameController.gameSetup();
 
