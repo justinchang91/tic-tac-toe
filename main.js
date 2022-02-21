@@ -34,12 +34,16 @@ const gameState = (function(){
     }
 
     function changeTurn() {
+        let message = undefined;
         if (gameState.turn === gameState.gameSettings.X) {
             gameState.turn = gameState.gameSettings.O;
+            message = Message("O", null).outputTurn();
         } else {
             gameState.turn = gameState.gameSettings.X;
+            message = Message("X", null).outputTurn();
         }
-        console.log(`Changed turn to ${gameState.turn}`);
+        gameLogController.addToMessagesArray(message);
+        gameLogController.displayMessages();
     }
 
     function checkWinner(mark) {
@@ -116,14 +120,25 @@ const gameController = (function(){
 
         gameBoard.displayBoardContentToScreen();
 
+        const message = Message("X", squareId).outputMove();
+        gameLogController.addToMessagesArray(message);
+        gameLogController.displayMessages();
+        
+
         // Check if game is over after every user and computer move
         if (gameState.gameOver("X")) {
+            let message = undefined;
             const result = gameState.getGameResults();
+
             if (result === "tie") {
-                console.log("Game over. Tie!");
+                message = Message("X", squareId).outputTie();
             } else {
-                console.log(`Game over. ${result} won!`);
+                message = Message("X", squareId).outputWinner();
             }
+
+            gameLogController.addToMessagesArray(message);
+            gameLogController.displayMessages();
+
         } else {
             gameState.changeTurn();
             enableClickSquares();
@@ -141,14 +156,24 @@ const gameController = (function(){
 
         gameBoard.displayBoardContentToScreen();
 
+        const message = Message("O", squareId).outputMove();
+        gameLogController.addToMessagesArray(message);
+        gameLogController.displayMessages();
+
         // Check if game is over after every user and computer move
         if (gameState.gameOver("O")){
+            let message = undefined;
             const result = gameState.getGameResults();
+
             if (result === "tie") {
-                console.log("Game over. Tie!");
+                message = Message("O", squareId).outputTie();
             } else {
-                console.log(`Game over. ${result} won!`);
+                message = Message("O", squareId).outputWinner();
             }
+
+            gameLogController.addToMessagesArray(message);
+            gameLogController.displayMessages();
+
         } else {
             gameState.changeTurn();
             enableClickSquares();
@@ -164,12 +189,20 @@ const gameController = (function(){
 
         const playButton = document.querySelector(".submit");
         playButton.addEventListener("click", settingsController.processFormData);
+
+        const introMessage = Message(null, null).outputIntroMessage();
+        gameLogController.addToMessagesArray(introMessage);
+        gameLogController.displayMessages();
     }
 
     function gameStart() {
         gameBoard.displayBoardContentToScreen();
         console.log(gameState.gameSettings.X);
         gameState.turn = gameState.gameSettings.X; // Set turn to X for default
+
+        const message = Message("X", null).outputTurn();
+        gameLogController.addToMessagesArray(message);
+        gameLogController.displayMessages();
         enableClickSquares();
 
         // Make a function that creates the player objects. Call the function here?
@@ -357,7 +390,78 @@ const settingsController = (function() {
     return {enablePVPElements, enableAIElements, processFormData, resetSettings}
 })();
 
+
+/* Module that controls what gets displayed on the game log */
+
+const gameLogController = (function() {
+    let messages = [];
+
+    function displayMessages() {
+        const messageArea = document.querySelector(".message-area");
+        removeAllChildNodes(messageArea);
+        for (let message of messages) {
+            const newMessage = document.createElement("div");
+            newMessage.innerHTML = message;
+            newMessage.classList.add("message");
+            messageArea.appendChild(newMessage);
+        }
+    }
+
+    function addToMessagesArray(message) {
+        messages.unshift(message);
+    }
+
+    function removeAllChildNodes(parent) {
+        while (parent.firstChild) {
+          parent.removeChild(parent.firstChild);
+        }
+    }
+
+    return {messages, addToMessagesArray, displayMessages};
+})();
+
+/* Factory function that creates Message objects */
+
+const Message = function(mark, location) {
+    let name = gameState.gameSettings[mark];
+
+    function outputIntroMessage() {
+        return "Welcome to Tic Tac Toe!";
+    }
+
+    function outputTurn() {
+        if (mark === "X") {
+            return `It's <span style="color:blue">${name}</span>'s turn`;
+        } else {
+            return `It's <span style="color:red">${name}</span>'s turn`;
+        }
+        
+    }
+
+    function outputMove() {
+        if (mark === "X") {
+            return `<span style="color:blue">${name}</span> placed an ${mark} at P${location}`;
+        } else {
+            return `<span style="color:red">${name}</span> placed an ${mark} at P${location}`
+        }
+        
+    }
+
+    function outputWinner() {
+        if (mark === "X") {
+            return `Game over! <span style="color:blue">${name}</span> won!`;
+        } else {
+            return `Game over! <span style="color:red">${name}</span> won!`;
+        }
+        
+    }
+
+    function outputTie() {
+        return `Game over! Tie!`;
+    }
+
+    return {outputIntroMessage, outputTurn, outputMove, outputWinner, outputTie};
+};
+
 gameController.gameSetup();
-
-
 

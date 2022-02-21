@@ -144,3 +144,36 @@ body {
     justify-content: center;
     align-items: center;
 }
+
+.gameArea {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 50px;
+}
+
+.chat {
+    box-sizing: border-box;
+    width: 300px;
+    height: 350px;
+    border: solid black 1px;
+    padding: 7px 20px 20px 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat .message-area {
+    box-sizing: border-box;
+    flex: 1;
+    border: solid black 1px;
+    overflow: auto;
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+.chat .message-area .message {
+    padding: 3px;
+    border-top: solid black 1px;
+    font-size: 12px;
+}
