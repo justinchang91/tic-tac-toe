@@ -316,7 +316,9 @@ const settingsController = (function() {
         } else if (mode.querySelector('input[id="ai"]').checked === true) {
             gameSettings.mode = "ai";
         } else {  // User didn't select anything
-            console.log("Error! User didn't select a mode"); // temporary
+            let message = Message(null, null).outputErrorNoMode();
+            gameLogController.addToMessagesArray(message);
+            gameLogController.displayMessages();
             return;
         }
 
@@ -349,19 +351,37 @@ const settingsController = (function() {
     function getPlayerInfo(player, gameSettings) {
         // Get player name:
         const name = player.querySelector('input[type=text]').value;
-        if (name === "") {
-            console.log("Please enter a name for player 1!");
+        if (name.length === 0) {
+            let message = Message(null, null).outputErrorNoName();
+            gameLogController.addToMessagesArray(message);
+            gameLogController.displayMessages();
             return false;
         } 
 
         // Get player mark, assign name to mark
         const mark = player.querySelector('.marks');
         if (mark.querySelector('input[id="x"]').checked === true) {
-            gameSettings["X"] = name;
+            if (gameSettings.hasOwnProperty("X")) {  // If X is already chosen
+                let message = Message("X", null).outputErrorMarkAlreadyChosen();
+                gameLogController.addToMessagesArray(message);
+                gameLogController.displayMessages();
+                return false;
+            } else {
+                gameSettings["X"] = name;
+            }
         } else if (mark.querySelector('input[id="o"]').checked === true) {
-            gameSettings["O"] = name;
+            if (gameSettings.hasOwnProperty("O")) {  // If O is already chosen
+                let message = Message("O", null).outputErrorMarkAlreadyChosen();
+                gameLogController.addToMessagesArray(message);
+                gameLogController.displayMessages();
+                return false;
+            } else {
+                gameSettings["O"] = name;
+            }
         } else {  // User didn't select anything
-            console.log("Error! User didn't select a mode"); // temporary
+            let message = Message(null, null).outputErrorNoMark();
+            gameLogController.addToMessagesArray(message);
+            gameLogController.displayMessages();
             return false;
         }
 
@@ -376,11 +396,13 @@ const settingsController = (function() {
         } else if (compDifficulty.querySelector('input[id="hard"]').checked === true) {
             gameSettings.computer.difficulty = "hard";
         } else {  // User didn't select anything
-            console.log("Error! User didn't select a mode"); // temporary
+            let message = Message(null, null).outputErrorNoDifficulty();
+            gameLogController.addToMessagesArray(message);
+            gameLogController.displayMessages();
             return false;
         }
 
-        // Get computer mark
+        // Get computer mark (THIS IS WRONG. Change when editing computer)
         const p1Mark = gameSettings.player1.mark;
         gameSettings.computer.mark = p1Mark === "X" ? "O" : "X";
 
@@ -423,7 +445,7 @@ const gameLogController = (function() {
 /* Factory function that creates Message objects */
 
 const Message = function(mark, location) {
-    let name = gameState.gameSettings[mark];
+    const name = gameState.gameSettings[mark];
 
     function outputIntroMessage() {
         return "Welcome to Tic Tac Toe!";
@@ -460,7 +482,29 @@ const Message = function(mark, location) {
         return `Game over! Tie!`;
     }
 
-    return {outputIntroMessage, outputTurn, outputMove, outputWinner, outputTie};
+    function outputErrorNoMode() {
+        return `<span style="color:red">Error! Please select a mode.</span>`;
+    }
+
+    function outputErrorNoMark() {
+        return `<span style="color:red">Error! Please select a mark.</span>`;
+    }
+
+    function outputErrorNoDifficulty() {
+        return `<span style="color:red">Error! Please select a difficulty.</span>`;
+    }
+
+    function outputErrorNoName() {
+        return `<span style="color:red">Error! Please enter all required player names.</span>`;
+    }
+
+    function outputErrorMarkAlreadyChosen() {
+        return `<span style="color:red">Error! Mark ${mark} was already chosen!`;
+    }
+
+    return {outputIntroMessage, outputTurn, outputMove, outputWinner, outputTie,
+            outputErrorNoMode, outputErrorNoMark, outputErrorNoDifficulty,
+            outputErrorNoName, outputErrorMarkAlreadyChosen};
 };
 
 gameController.gameSetup();
