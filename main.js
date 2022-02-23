@@ -81,15 +81,69 @@ const gameState = (function(){
 
 const gameController = (function(){
 
+    function gameStart() {
+        gameBoard.displayBoardContentToScreen();
+        console.log(gameState.gameSettings.X);
+        gameState.turn = gameState.gameSettings.X; // Set turn to X at game start by default
+
+        const message = Message("X", null).outputTurn();
+        gameLogController.addToMessagesArray(message);
+        gameLogController.displayMessages();
+
+        determineTurnBasedOnMode();
+    }
+
+    function gameSetup() {
+        const pvpButton = document.querySelector('input[id="pvp"]');
+        pvpButton.addEventListener("click", settingsController.enablePVPElements);
+
+        const aiButton = document.querySelector('input[id="ai"]');
+        aiButton.addEventListener("click", settingsController.enableAIElements);
+
+        const playButton = document.querySelector(".submit");
+        playButton.addEventListener("click", settingsController.processFormData);
+
+        const introMessage = Message(null, null).outputIntroMessage();
+        gameLogController.addToMessagesArray(introMessage);
+        gameLogController.displayMessages();
+    }
+
+    function determineTurnBasedOnMode() {
+        // Check which mode we're in and determines whether or not it's the computer making a move or a player
+        if (gameState.gameSettings.mode === "pvp") { 
+            playerController.enableClickSquares();
+        } else {
+            // We are in AI game mode
+            if (gameState.turn === "Computer" && gameState.gameSettings.difficulty === "easy") {
+                computerController.makeComputerMoveEasy();
+            } else if (gameState.turn === "Computer" && gameState.gameSettings.difficulty === "hard") {
+                computerController.makeComputerMoveHard();
+            } else {
+                // It's the user's turn
+                playerController.enableClickSquares();
+            }
+        }
+    }
+
+    return {gameSetup, gameStart, determineTurnBasedOnMode};
+
+})();
+
+/* Controls the player's moves */
+
+const playerController = (function() {
+
     function enableClickSquares() {
         for (let i = 0; i < 9; i++) {
             const square = document.querySelector(`.square${i}`);
             if (gameBoard.board[i] == "") {
 
                 if (gameState.turn === gameState.gameSettings.X) {
+                    // If it's X's turn, place X in square when square is clicked
                     square.addEventListener("click", placeXMark);
                     console.log(`User event listener added to square ${square.id}`);
                 } else {
+                    // If it's O's turn, place O in square when square is clicked
                     square.addEventListener("click", placeOMark);
                     console.log(`Computer event listener added to square ${square.id}`);
                 }
@@ -110,6 +164,27 @@ const gameController = (function(){
         }
     }
 
+    function checkIfGameOver(mark, squareId) {
+        if (gameState.gameOver(mark)) {
+            let message = undefined;
+            const result = gameState.getGameResults();
+
+            if (result === "tie") {
+                message = Message(mark, squareId).outputTie();
+            } else {
+                message = Message(mark, squareId).outputWinner();
+            }
+
+            // Add the game over message to log
+            gameLogController.addToMessagesArray(message);
+            gameLogController.displayMessages();
+
+        } else {
+            gameState.changeTurn();
+            gameController.determineTurnBasedOnMode();
+        }
+    }
+
     function placeXMark(e) {
         const squareId = e.target.id;
         gameBoard.editBoardArray("X", squareId);
@@ -120,29 +195,14 @@ const gameController = (function(){
 
         gameBoard.displayBoardContentToScreen();
 
+        // Output message to log saying who moved
         const message = Message("X", squareId).outputMove();
         gameLogController.addToMessagesArray(message);
         gameLogController.displayMessages();
         
 
         // Check if game is over after every user and computer move
-        if (gameState.gameOver("X")) {
-            let message = undefined;
-            const result = gameState.getGameResults();
-
-            if (result === "tie") {
-                message = Message("X", squareId).outputTie();
-            } else {
-                message = Message("X", squareId).outputWinner();
-            }
-
-            gameLogController.addToMessagesArray(message);
-            gameLogController.displayMessages();
-
-        } else {
-            gameState.changeTurn();
-            enableClickSquares();
-        }
+        checkIfGameOver("X", squareId);
     }
 
     function placeOMark(e) {
@@ -161,59 +221,27 @@ const gameController = (function(){
         gameLogController.displayMessages();
 
         // Check if game is over after every user and computer move
-        if (gameState.gameOver("O")){
-            let message = undefined;
-            const result = gameState.getGameResults();
-
-            if (result === "tie") {
-                message = Message("O", squareId).outputTie();
-            } else {
-                message = Message("O", squareId).outputWinner();
-            }
-
-            gameLogController.addToMessagesArray(message);
-            gameLogController.displayMessages();
-
-        } else {
-            gameState.changeTurn();
-            enableClickSquares();
-        }
+        checkIfGameOver("O", squareId);
     }
 
-    function gameSetup() {
-        const pvpButton = document.querySelector('input[id="pvp"]');
-        pvpButton.addEventListener("click", settingsController.enablePVPElements);
-
-        const aiButton = document.querySelector('input[id="ai"]');
-        aiButton.addEventListener("click", settingsController.enableAIElements);
-
-        const playButton = document.querySelector(".submit");
-        playButton.addEventListener("click", settingsController.processFormData);
-
-        const introMessage = Message(null, null).outputIntroMessage();
-        gameLogController.addToMessagesArray(introMessage);
-        gameLogController.displayMessages();
-    }
-
-    function gameStart() {
-        gameBoard.displayBoardContentToScreen();
-        console.log(gameState.gameSettings.X);
-        gameState.turn = gameState.gameSettings.X; // Set turn to X for default
-
-        const message = Message("X", null).outputTurn();
-        gameLogController.addToMessagesArray(message);
-        gameLogController.displayMessages();
-        enableClickSquares();
-
-        // Make a function that creates the player objects. Call the function here?
-        // Maybe when we add to the gameSettings object, we create the actual players
-        // using a factory function then add that to the gameSettings object.
-    }
-
-    return {gameSetup, gameStart};
+    return {enableClickSquares};
 
 })();
 
+/* Controls the computer's moves */
+
+const computerController = (function() {
+    function makeComputerMoveEasy() {
+
+    }
+
+    function makeComputerMoveHard() {
+
+    }
+
+    return {makeComputerMoveEasy, makeComputerMoveHard};
+
+})();
 
 /* Controls the settings form */
 
@@ -332,16 +360,15 @@ const settingsController = (function() {
             if (!getPlayerInfo(player2, gameSettings)) return;
         } else {
             // Get computer info
-            gameSettings.computer = {};
             const computer = document.querySelector('.computer');
             if(!getComputerInfo(computer, gameSettings)) return;
         }
 
         
-        gameStartSettings();
+        gameStartSettings(); // Disable all the settings once the game has started
         console.log(gameSettings);
         gameState.gameSettings = gameSettings;
-        gameController.gameStart();
+        gameController.gameStart(); // Check if it's PVP vs AI, go accordingly
     }
 
     function resetSettings() {
@@ -392,9 +419,9 @@ const settingsController = (function() {
         // Get computer difficulty
         const compDifficulty = computer.querySelector('.difficulty');
         if (compDifficulty.querySelector('input[id="easy"]').checked === true) {
-            gameSettings.computer.difficulty = "easy";
+            gameSettings.difficulty = "easy";
         } else if (compDifficulty.querySelector('input[id="hard"]').checked === true) {
-            gameSettings.computer.difficulty = "hard";
+            gameSettings.difficulty = "hard";
         } else {  // User didn't select anything
             let message = Message(null, null).outputErrorNoDifficulty();
             gameLogController.addToMessagesArray(message);
@@ -402,9 +429,12 @@ const settingsController = (function() {
             return false;
         }
 
-        // Get computer mark (THIS IS WRONG. Change when editing computer)
-        const p1Mark = gameSettings.player1.mark;
-        gameSettings.computer.mark = p1Mark === "X" ? "O" : "X";
+        // Get computer mark
+        if (gameSettings.hasOwnProperty("X")) {
+            gameSettings["O"] = "Computer";
+        } else {
+            gameSettings["X"] = "Computer";
+        }
 
         return true;
     }
