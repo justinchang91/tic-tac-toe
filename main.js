@@ -125,7 +125,28 @@ const gameController = (function(){
         }
     }
 
-    return {gameSetup, gameStart, determineTurnBasedOnMode};
+    function checkIfGameOver(mark, squareId) {
+        if (gameState.gameOver(mark)) {
+            let message = undefined;
+            const result = gameState.getGameResults();
+
+            if (result === "tie") {
+                message = Message(mark, squareId).outputTie();
+            } else {
+                message = Message(mark, squareId).outputWinner();
+            }
+
+            // Add the game over message to log
+            gameLogController.addToMessagesArray(message);
+            gameLogController.displayMessages();
+
+        } else {
+            gameState.changeTurn();
+            determineTurnBasedOnMode();
+        }
+    }
+
+    return {gameSetup, gameStart, checkIfGameOver};
 
 })();
 
@@ -164,27 +185,6 @@ const playerController = (function() {
         }
     }
 
-    function checkIfGameOver(mark, squareId) {
-        if (gameState.gameOver(mark)) {
-            let message = undefined;
-            const result = gameState.getGameResults();
-
-            if (result === "tie") {
-                message = Message(mark, squareId).outputTie();
-            } else {
-                message = Message(mark, squareId).outputWinner();
-            }
-
-            // Add the game over message to log
-            gameLogController.addToMessagesArray(message);
-            gameLogController.displayMessages();
-
-        } else {
-            gameState.changeTurn();
-            gameController.determineTurnBasedOnMode();
-        }
-    }
-
     function placeXMark(e) {
         const squareId = e.target.id;
         gameBoard.editBoardArray("X", squareId);
@@ -202,7 +202,7 @@ const playerController = (function() {
         
 
         // Check if game is over after every user and computer move
-        checkIfGameOver("X", squareId);
+        gameController.checkIfGameOver("X", squareId);
     }
 
     function placeOMark(e) {
@@ -221,7 +221,7 @@ const playerController = (function() {
         gameLogController.displayMessages();
 
         // Check if game is over after every user and computer move
-        checkIfGameOver("O", squareId);
+        gameController.checkIfGameOver("O", squareId);
     }
 
     return {enableClickSquares};
@@ -231,6 +231,11 @@ const playerController = (function() {
 /* Controls the computer's moves */
 
 const computerController = (function() {
+
+    function getAvailableSquares() { // Returns an array of available squares
+
+    }
+
     function makeComputerMoveEasy() {
 
     }
