@@ -28,6 +28,7 @@ const gameState = (function(){
 
     let turn = "";
     let gameSettings = {};
+    let winningSquares = [];
 
     function gameOver(mark) {
         return checkWinner(mark) || !gameBoard.board.includes("");
@@ -47,28 +48,37 @@ const gameState = (function(){
     }
 
     function checkWinner(mark) {
-        if ((gameBoard.board[0] === mark && gameBoard.board[1] === mark && gameBoard.board[2] === mark) ||
-            (gameBoard.board[3] === mark && gameBoard.board[4] === mark && gameBoard.board[5] === mark) ||
-            (gameBoard.board[6] === mark && gameBoard.board[7] === mark && gameBoard.board[8] === mark) ||
-            (gameBoard.board[0] === mark && gameBoard.board[3] === mark && gameBoard.board[6] === mark) ||
-            (gameBoard.board[1] === mark && gameBoard.board[4] === mark && gameBoard.board[7] === mark) ||
-            (gameBoard.board[2] === mark && gameBoard.board[5] === mark && gameBoard.board[8] === mark) ||
-            (gameBoard.board[0] === mark && gameBoard.board[4] === mark && gameBoard.board[8] === mark) ||
-            (gameBoard.board[2] === mark && gameBoard.board[4] === mark && gameBoard.board[6] === mark)) {
-                return true;
+        if (gameBoard.board[0] === mark && gameBoard.board[1] === mark && gameBoard.board[2] === mark) {
+            winningSquares.push(0, 1, 2);
+            return true;
+        } else if (gameBoard.board[3] === mark && gameBoard.board[4] === mark && gameBoard.board[5] === mark) {
+            winningSquares.push(3, 4, 5);
+            return true;
+        } else if (gameBoard.board[6] === mark && gameBoard.board[7] === mark && gameBoard.board[8] === mark) {
+            winningSquares.push(6, 7, 8);
+            return true;
+        } else if (gameBoard.board[0] === mark && gameBoard.board[3] === mark && gameBoard.board[6] === mark) {
+            winningSquares.push(0, 3, 6);
+            return true;
+        } else if (gameBoard.board[1] === mark && gameBoard.board[4] === mark && gameBoard.board[7] === mark) {
+            winningSquares.push(1, 4, 7);
+            return true;
+        } else if (gameBoard.board[2] === mark && gameBoard.board[5] === mark && gameBoard.board[8] === mark) {
+            winningSquares.push(2, 5, 8);
+            return true;
+        } else if (gameBoard.board[0] === mark && gameBoard.board[4] === mark && gameBoard.board[8] === mark) {
+            winningSquares.push(0, 4, 8);
+            return true;
+        } else if (gameBoard.board[2] === mark && gameBoard.board[4] === mark && gameBoard.board[6] === mark) {
+            winningSquares.push(2, 4, 6);
+            return true;
         } else {
             return false;
         }
     }
 
     function getGameResults() {
-        if (checkWinner("X")) {
-            return "user";  // These are hard coded but should change once I make player objects
-        } else if (checkWinner("O")) {
-            return "computer";
-        } else {
-            return "tie";
-        }
+        return winningSquares;
     }
 
     return {changeTurn, gameOver, getGameResults, gameSettings, turn};
@@ -128,12 +138,20 @@ const gameController = (function(){
     function checkIfGameOver(mark, squareId) {
         if (gameState.gameOver(mark)) {
             let message = undefined;
-            const result = gameState.getGameResults();
+            const winningSquares = gameState.getGameResults(); // Get the winning squares
 
-            if (result === "tie") {
+            if (winningSquares.length === 0) {
                 message = Message(mark, squareId).outputTie();
+                // Colour all the squares red to show tie
+                for (let i = 0; i < 9; i++) {
+                    document.querySelector(`.square${i}`).style.backgroundColor = "crimson";
+                }
             } else {
                 message = Message(mark, squareId).outputWinner();
+                // Color the winning squares green
+                winningSquares.forEach(squareId => {
+                    document.querySelector(`.square${squareId}`).style.backgroundColor = "palegreen";
+                });
             }
 
             // Add the game over message to log
@@ -540,9 +558,9 @@ const Message = function(mark, location) {
 
     function outputWinner() {
         if (mark === "X") {
-            return `Game over! <span style="color:blue">${name}</span> won!`;
+            return `<strong>Game over!</strong> <span style="color:blue">${name}</span> won!`;
         } else {
-            return `Game over! <span style="color:red">${name}</span> won!`;
+            return `<strong>Game over!</strong> <span style="color:red">${name}</span> won!`;
         }
         
     }
