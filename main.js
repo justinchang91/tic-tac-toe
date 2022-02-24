@@ -224,7 +224,7 @@ const playerController = (function() {
         gameController.checkIfGameOver("O", squareId);
     }
 
-    return {enableClickSquares};
+    return {enableClickSquares, placeXMark, placeOMark};
 
 })();
 
@@ -243,7 +243,35 @@ const computerController = (function() {
     }
 
     function makeComputerMoveEasy() {
+        // Randomly choose from the available squares and place there
+        const availableSquares = getAvailableSquares();
+        console.log("Here are the available squares: ");
+        console.log(availableSquares);
 
+        // Select a random square from the available squares list
+        const computerChoice = availableSquares[Math.floor(Math.random() * availableSquares.length)];
+        console.log(`Computer choice: ${computerChoice}`);
+
+        // Make the computer place it's mark
+        let compSymbol = undefined;
+        if (gameState.gameSettings.X === "Computer") {
+            compSymbol = "X";
+        } else {
+            compSymbol = "O";
+        }
+
+        // Set a timeout so that there is a slight delay before computer makes move
+        setTimeout(() => {
+            gameBoard.editBoardArray(compSymbol, computerChoice);
+            gameBoard.displayBoardContentToScreen();
+
+            const message = Message(compSymbol, computerChoice).outputMove();
+            gameLogController.addToMessagesArray(message);
+            gameLogController.displayMessages();
+
+            // Check if game is over after every user and computer move
+            gameController.checkIfGameOver(compSymbol, computerChoice);
+        }, 1500);   
     }
 
     function makeComputerMoveHard() {
