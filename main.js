@@ -233,7 +233,13 @@ const playerController = (function() {
 const computerController = (function() {
 
     function getAvailableSquares() { // Returns an array of available squares
-
+        let availableSquares = [];
+        for (let i = 0; i < gameBoard.board.length; i++) {  // i represents square id
+            if (gameBoard.board[i] === "") {
+                availableSquares.push(i);
+            }
+        }
+        return availableSquares;
     }
 
     function makeComputerMoveEasy() {
