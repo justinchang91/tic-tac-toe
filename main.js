@@ -374,13 +374,6 @@ const settingsController = (function() {
         modeRadioButtons.forEach(radio => radio.disabled = true);
     }
 
-    function enableModeElements() {
-        const mode = document.querySelector(".mode");
-        mode.classList.remove("hide");
-        const modeRadioButtons = mode.querySelectorAll('input[type=radio]');
-        modeRadioButtons.forEach(radio => radio.disabled = false);
-    }
-
     function gameStartSettings() {
         disablePVPElements();
         disableAIElements();
@@ -479,6 +472,11 @@ const settingsController = (function() {
             gameSettings.difficulty = "easy";
         } else if (compDifficulty.querySelector('input[id="hard"]').checked === true) {
             gameSettings.difficulty = "hard";
+            // For now since I don't have hard mode set up
+            let message = Message(null, null).outputErrorAIHardUnavailable();
+            gameLogController.addToMessagesArray(message);
+            gameLogController.displayMessages();
+            return false;
         } else {  // User didn't select anything
             let message = Message(null, null).outputErrorNoDifficulty();
             gameLogController.addToMessagesArray(message);
@@ -586,12 +584,16 @@ const Message = function(mark, location) {
     }
 
     function outputErrorMarkAlreadyChosen() {
-        return `<span style="color:red">Error! Mark ${mark} was already chosen!`;
+        return `<span style="color:red">Error! Mark ${mark} was already chosen!</span>`;
+    }
+
+    function outputErrorAIHardUnavailable() {
+        return `<span style="color:red">Error! AI hard more is currently unavailable.</span>`;
     }
 
     return {outputIntroMessage, outputTurn, outputMove, outputWinner, outputTie,
             outputErrorNoMode, outputErrorNoMark, outputErrorNoDifficulty,
-            outputErrorNoName, outputErrorMarkAlreadyChosen};
+            outputErrorNoName, outputErrorMarkAlreadyChosen, outputErrorAIHardUnavailable};
 };
 
 gameController.gameSetup();
